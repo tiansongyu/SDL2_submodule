@@ -15,8 +15,12 @@ public:
 		return desc;
 	}
 	vector<MenuOption> subMenu;
+	void callFunc() {
+		if (callback != nullptr)callback();
+	}
 protected:
 	string desc;
 	function<void()> callback;
+
 
 };

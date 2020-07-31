@@ -63,13 +63,20 @@ void UI::PaintMenu()
 	mainMenu.push_back(MenuOption("mainMenu text 2 ", "StarDust Tools.", nullptr));
 	mainMenu.push_back(MenuOption("mainMenu text 3 ", "Autoboot", nullptr));
 	mainMenu.push_back(MenuOption("mainMenu text 4 ", "Power options.", nullptr));
-	mainMenu.push_back(MenuOption("mainMenu text 5 ", "About StarDust Toolkit.", nullptr));
+	mainMenu.push_back(MenuOption("mainMenu text 5 ", "About StarDust Toolkit.", bind(&UI::printf_test, this)));
 	
 	//sub pages
 	mainMenu[0].subMenu.push_back(MenuOption("sub menu 0.1", "", nullptr));
 	mainMenu[0].subMenu.push_back(MenuOption("sub menu 0.2", "", nullptr));
 	mainMenu[1].subMenu.push_back(MenuOption("sub menu 1.1", "", nullptr));
 	mainMenu[1].subMenu.push_back(MenuOption("sub menu 1.2", "", nullptr));
+}
+void print_test_thread()
+{
+	while (1)
+	{
+		printf("test\n");
+	}
 }
 void UI::Menuup()
 {
@@ -106,6 +113,8 @@ void UI::Menuright()
 {
 	if (!inSubMenu)
 	{
+		if (mainMenu[currSel].subMenu.empty())
+			mainMenu[currSel].callFunc();
 		inSubMenu = !inSubMenu;
 	}
 	currSubSel = 0;

@@ -11,7 +11,9 @@
 #include "Themes.h"
 #include "MenuOption.hpp"
 #include "type.h"
+#include <thread>
 using namespace std;
+void print_test_thread();
 class UI
 {
 public:
@@ -29,7 +31,24 @@ public:
 		void subMenudown();
 		void Menuright();
 		void Menuleft();
-
+		void print() { while (1)printf("test\n"); }
+		//lambda表达式多线程例子
+		/*void printf_test() 
+		{
+			 for(int i = 0; i < 4; ++i) {
+				thread t([i] {
+					while(1)printf("%d test\n", i);
+				});
+				t.detach();
+			}
+		}*/
+		void printf_test()
+		{
+			for (int i = 0; i < 4; ++i) {
+				thread t(print_test_thread);
+				t.detach();
+			}
+		}
 		bool inSubMenu;
 		void deinit(); //释放内存
 private:
