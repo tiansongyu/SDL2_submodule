@@ -10,17 +10,10 @@ static unsigned titleY = 30;
 static unsigned menuX = 55, menuY = 115;
 static unsigned subX = 411, subY = 88;
 
-SDL_Color convertColor(unsigned col) {
-	SDL_Color c;
-	c.r = ((col >> 24) & 0xFF);
-	c.g = ((col >> 16) & 0xFF);
-	c.b = ((col >> 8) & 0xFF);
-	c.a = (col & 0xFF);
-	return c;
-}
-
 UI::UI(std::string title,const unsigned SCREEN_WIDTH, const unsigned SCREEN_HEIGHT)
 {
+
+
 	if (!SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, "1"))
 	{
 		printf("Warning: Linear texture filtering not enabled!");
@@ -32,24 +25,23 @@ UI::UI(std::string title,const unsigned SCREEN_WIDTH, const unsigned SCREEN_HEIG
 	else
 		printf("sdl_ttf初始化成功\n");
 	SDL_Init(SDL_INIT_EVERYTHING);
-	quit = false;
-	gWindow = SDL_CreateWindow(title.c_str(), SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, SCREEN_WIDTH, SCREEN_HEIGHT, SDL_WINDOW_SHOWN);
-	if (gWindow == NULL)
+	mRender._window = SDL_CreateWindow(title.c_str(), SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, SCREEN_WIDTH, SCREEN_HEIGHT, SDL_WINDOW_SHOWN);
+	if (mRender._window == NULL)
 	{
 		printf("Window could not be created! SDL_Error: %s\n", SDL_GetError());
 	}
 	else
 	{
 		//获取渲染层
-		gRenderer = SDL_CreateRenderer(gWindow, -1, SDL_RENDERER_ACCELERATED);
-		if (gRenderer == NULL)
+		mRender._renderer = SDL_CreateRenderer(mRender._window, -1, SDL_RENDERER_ACCELERATED);
+		if (mRender._renderer == NULL)
 		{
 			printf("渲染层失败\n");
 
 		}
 		else
 		{
-			SDL_SetRenderDrawColor(gRenderer, 0xFF, 0xFF, 0xFF, 0xFF);
+			SDL_SetRenderDrawColor(mRender._renderer, 0xFF, 0xFF, 0xFF, 0xFF);
 			//Initialize PNG loading
 			int imgFlags = IMG_INIT_PNG;
 			if (!(IMG_Init(imgFlags) & imgFlags))
@@ -58,29 +50,21 @@ UI::UI(std::string title,const unsigned SCREEN_WIDTH, const unsigned SCREEN_HEIG
 			}
 		}
 	}
+	mThemes = new Themes(mRender);
 	printf("渲染成功\n");
 
-}
-bool UI::setFont_Color()
-{
-	gfont = TTF_OpenFont("./data/lazy.ttf", 28);
-	if (gfont == NULL)
-	{
-		printf("Failed to load lazy font! SDL_ttf Error: %s\n", TTF_GetError());
-		return false;
-	}
-	return true;
 }
 unsigned clock_count = 0;
 void UI::handle_gui()
 {
+	SDL_Event e;
+	bool quit =false ;
+	//绘制菜单；
 	renderMenu();
-
 	while (!quit)
 	{
 		while (SDL_PollEvent(&e) != 0)
 		{
-			//User requests quit
 			if (e.type == SDL_QUIT)
 			{
 				quit = true;
@@ -93,11 +77,7 @@ void UI::handle_gui()
 		}
 		printf("%d\n" , clock_count);
 		clock_count++;
-		//SDL_SetRenderDrawColor(gRenderer,0xff,0xff,0xff,0xff);
-
-		//Update screen
-
-		//Update the surface
+		//SDL_SetRenderDrawColor(mRender._renderer,0xff,0xff,0xff,0xff);
 		//SDL_UpdateWindowSurface(gWindow);
 	}
 }
@@ -107,20 +87,20 @@ void UI::renderMenu()
 	char buff[40];
 	memset(buff, '\0', sizeof(buff));
 	ctime_s(buff, sizeof(buff), &now);
-
-	SDL_RenderClear(gRenderer);
-	SDL_RenderCopy(gRenderer, image_Texture, NULL, NULL);
+	//开始渲染背景图片和文字
+	SDL_RenderClear(mRender._renderer); //清除界面
+	SDL_RenderCopy(mRender._renderer, mThemes->bgt, NULL, NULL); //设置背景
 	//Mainmenu  text
-	drawText(60, 30, color_red, "tian sofeware", gfont); //titulo
-	drawText(1150, 30, color_red, "v1.3", gfont);//vercion HB
-	drawText(500, 30, color_red, buff, gfont);//time
-	drawText(1150, 100, color_red, "v 3.4", gfont);//vercion HB
-	drawText(100, 100, color_red, u8"nihao a 你好", gfont);
+	drawText(60, 30, mThemes->TextColor, "tian sofeware", mThemes->gfont); //titulo
+	drawText(1150, 30, mThemes->TextColor, "v1.3", mThemes->gfont);//vercion HB
+	drawText(500, 30, mThemes->TextColor, buff, mThemes->gfont);//time
+	drawText(1150, 100, mThemes->TextColor, "v 3.4", mThemes->gfont);//vercion HB
+	drawText(100, 100, mThemes->TextColor, u8"nihao a 你好", mThemes->gfont);
 
 
-	drawRect(menuX-10, menuY-10, 210 + 20, 25 + 20, convertColor(GREY), 5, convertColor(LIGHTBLUE));
+	drawRect(menuX-10, menuY-10, 210 + 20, 25 + 20, mThemes->ButtonColor, 5, mThemes->ButtonBorderColor);
 
-	SDL_RenderPresent(gRenderer);
+	SDL_RenderPresent(mRender._renderer);
 	//drawRect(menuX - 10, oy - 10, 210 + 20, 25 + 20, mThemes->butCol, 5, mThemes->butBorderCol);
 
 }
@@ -136,12 +116,12 @@ void UI::drawRect(int x, int y, int w, int h, SDL_Color scolor)
 	rect.y = y;
 	rect.w = w;
 	rect.h = h;
-	SDL_SetRenderDrawColor(gRenderer, scolor.r, scolor.g, scolor.b, scolor.a);
-	SDL_RenderFillRect(gRenderer, &rect);
+	SDL_SetRenderDrawColor(mRender._renderer, scolor.r, scolor.g, scolor.b, scolor.a);
+	SDL_RenderFillRect(mRender._renderer, &rect);
 }
 bool UI::render(SDL_Texture* mTexture, const int x,const int y)
 {
-	if (!SDL_RenderCopy(gRenderer, mTexture, NULL, NULL))
+	if (!SDL_RenderCopy(mRender._renderer, mTexture, NULL, NULL))
 	{
 		printf("render fail\n");
 		return false;
@@ -151,7 +131,7 @@ bool UI::render(SDL_Texture* mTexture, const int x,const int y)
 bool UI::loadMedia(const string path)//加载图片
 {
 	
-	SDL_Texture* newTexture = NULL;
+	/*SDL_Texture* newTexture = NULL;
 
 	SDL_Surface* loadedSurface = IMG_Load(path.c_str());
 	if (loadedSurface == NULL)
@@ -161,7 +141,7 @@ bool UI::loadMedia(const string path)//加载图片
 	else
 	{
 		//将render渲染成texture纹理
-		image_Texture = SDL_CreateTextureFromSurface(gRenderer, loadedSurface);
+		image_Texture = SDL_CreateTextureFromSurface(mRender._renderer, loadedSurface);
 		if (image_Texture == NULL)
 		{
 			printf("Unable to create texture from %s! SDL Error: %s\n", path.c_str(), SDL_GetError());
@@ -171,7 +151,7 @@ bool UI::loadMedia(const string path)//加载图片
 		SDL_FreeSurface(loadedSurface);
 		//释放surface ；
 		//使用texture
-	}
+	}*/
 	return true;
 }
 void UI::drawText(int x, int y, const SDL_Color scolor, const string text,  TTF_Font *font)
@@ -183,8 +163,8 @@ void UI::drawText(int x, int y, const SDL_Color scolor, const string text,  TTF_
 	}
 	//设置透明度
 	//SDL_SetSurfaceAlphaMod(surface, 0x4F);
-	this->text_Texture = SDL_CreateTextureFromSurface(gRenderer, textSurface);
-	if (this->text_Texture)
+	SDL_Texture* text_Texture = SDL_CreateTextureFromSurface(mRender._renderer, textSurface);
+	if (text_Texture)
 	{
 		SDL_Rect position;
 		position.x = x;
@@ -192,9 +172,9 @@ void UI::drawText(int x, int y, const SDL_Color scolor, const string text,  TTF_
 		position.w = textSurface->w;
 		position.h = textSurface->h;
 		//将文字纹理嵌入到渲染器中
-		SDL_RenderCopy(gRenderer, this->text_Texture, NULL, &position);
+		SDL_RenderCopy(mRender._renderer, text_Texture, NULL, &position);
 		//释放文字纹理
-		SDL_DestroyTexture(this->text_Texture);
+		SDL_DestroyTexture(text_Texture);
 	}
 	else
 		printf("渲染文字失败\n");
@@ -203,14 +183,10 @@ void UI::drawText(int x, int y, const SDL_Color scolor, const string text,  TTF_
 
 void UI::deinit()
 {
-	//Deallocate surface
-	SDL_FreeSurface(gXOut);
-	gXOut = NULL;
-
-	//Destroy window
-	SDL_DestroyWindow(gWindow);
-	gWindow = NULL;
-
-	//Quit SDL subsystems
+	TTF_Quit();
+	IMG_Quit();
+	SDL_DestroyRenderer(mRender._renderer);
+	SDL_FreeSurface(mRender._surface);
+	SDL_DestroyWindow(mRender._window);
 	SDL_Quit();
 }

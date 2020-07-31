@@ -21,9 +21,21 @@
     <ClCompile Include="my_gui.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="Themes.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="my_gui.h">
+    <ClInclude Include="type.h">
+      <Filter>Resource Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Themes.h">
+      <Filter>Resource Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Render.h">
+      <Filter>Resource Files</Filter>
+    </ClInclude>
+    <ClInclude Include="my_gui.hpp">
       <Filter>Resource Files</Filter>
     </ClInclude>
   </ItemGroup>

@@ -119,9 +119,13 @@
   <ItemGroup>
     <ClCompile Include="my_gui.cpp" />
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="Themes.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Render.h" />
+    <ClInclude Include="Themes.h" />
     <ClInclude Include="my_gui.h" />
+    <ClInclude Include="type.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
